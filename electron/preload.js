@@ -2,19 +2,17 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   getTransactions: () => ipcRenderer.invoke("get-transactions"),
-  addTransaction: (transaction) =>
-    ipcRenderer.invoke("add-transaction", transaction),
+  addTransaction: (t) => ipcRenderer.invoke("add-transaction", t),
   getSummary: () => ipcRenderer.invoke("get-summary"),
-  getSources: () => ipcRenderer.invoke("get-sources"),
-  getExpenseCategories: () => ipcRenderer.invoke("get-expense-categories"),
+  getCategories: (t) => ipcRenderer.invoke("get-categories", t),
+  updateTransaction: (i, t) => ipcRenderer.invoke("update-transaction", i, t),
+  deleteTransaction: (i) => ipcRenderer.invoke("delete-transaction", i),
+  getTransaction: (i) => ipcRenderer.invoke("get-transaction", i),
   exportData: () => ipcRenderer.invoke("export-data"),
-  getCategories: (type) => ipcRenderer.invoke("get-categories", type),
-  updateTransaction: (id, transaction) =>
-    ipcRenderer.invoke("update-transaction", id, transaction),
-  deleteTransaction: (id) => ipcRenderer.invoke("delete-transaction", id),
-  getTransaction: (id) => ipcRenderer.invoke("get-transaction", id),
-  // --- NEW REPORT METHODS ---
-  getMonthlyReport: (year, month) =>
-    ipcRenderer.invoke("get-monthly-report", year, month),
-  getYearlyReport: (year) => ipcRenderer.invoke("get-yearly-report", year),
+  getMonthlyReport: (y, m) => ipcRenderer.invoke("get-monthly-report", y, m),
+  getYearlyReport: (y) => ipcRenderer.invoke("get-yearly-report", y),
+  // --- NEW CATEGORY MANAGEMENT METHODS ---
+  getAllCustomCategories: () => ipcRenderer.invoke("get-all-custom-categories"),
+  addCategory: (c) => ipcRenderer.invoke("add-category", c),
+  deleteCategory: (i) => ipcRenderer.invoke("delete-category", i),
 });

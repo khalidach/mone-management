@@ -13,6 +13,10 @@ function Navbar() {
         <li>
           <NavLink to="/reports">التقارير</NavLink>
         </li>
+        <li>
+          <NavLink to="/categories">التصنيفات</NavLink>
+        </li>{" "}
+        {/* Add the new link */}
       </ul>
     </nav>
   );
