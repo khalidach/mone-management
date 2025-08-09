@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مدير المال - البرنامج العربي لتسيير المال</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="header">
+        <h1>💰 مدير المال</h1>
+        <button class="btn-export" onclick="exportData()">
+          تصدير البيانات
+        </button>
+      </header>
+
+      <div class="summary-cards">
+        <div class="card income">
+          <h3>إجمالي الدخل</h3>
+          <p id="total-income">0 ريال</p>
+        </div>
+        <div class="card expense">
+          <h3>إجمالي المصاريف</h3>
+          <p id="total-expense">0 ريال</p>
+        </div>
+        <div class="card balance">
+          <h3>الرصيد المتبقي</h3>
+          <p id="balance">0 ريال</p>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="form-section">
+          <h2>إضافة معاملة جديدة</h2>
+          <form id="transaction-form">
+            <div class="form-row">
+              <label>نوع المعاملة:</label>
+              <select id="transaction-type" required>
+                <option value="">اختر النوع</option>
+                <option value="income">دخل</option>
+                <option value="expense">مصروف</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label>المبلغ:</label>
+              <input type="number" id="amount" step="0.01" required />
+            </div>
+
+            <div class="form-row">
+              <label id="category-label">التصنيف:</label>
+              <select id="category" required>
+                <option value="">اختر التصنيف</option>
+              </select>
+            </div>
+
+            <div class="form-row" id="source-row" style="display: none">
+              <label>المصدر:</label>
+              <input
+                type="text"
+                id="source"
+                placeholder="مثال: راتب، عمل إضافي..."
+              />
+            </div>
+
+            <div class="form-row">
+              <label>الوصف:</label>
+              <input
+                type="text"
+                id="description"
+                placeholder="تفاصيل المعاملة"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>التاريخ:</label>
+              <input type="date" id="date" required />
+            </div>
+
+            <button type="submit" class="btn-primary">إضافة المعاملة</button>
+          </form>
+        </div>
+
+        <div class="charts-section">
+          <canvas id="expense-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="transactions-section">
+        <h2>آخر المعاملات</h2>
+        <table id="transactions-table">
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>النوع</th>
+              <th>المبلغ</th>
+              <th>التصنيف</th>
+              <th>المصدر</th>
+              <th>الوصف</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="edit-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>تعديل المعاملة</h2>
+        <form id="edit-form">
+          <input type="hidden" id="edit-id" />
+          <div class="form-row">
+            <label>نوع المعاملة:</label>
+            <select id="edit-type" required>
+              <option value="income">دخل</option>
+              <option value="expense">مصروف</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>المبلغ:</label>
+            <input type="number" id="edit-amount" step="0.01" required />
+          </div>
+          <div class="form-row">
+            <label>التصنيف:</label>
+            <select id="edit-category" required></select>
+          </div>
+          <div class="form-row" id="edit-source-row">
+            <label>المصدر:</label>
+            <input type="text" id="edit-source" />
+          </div>
+          <div class="form-row">
+            <label>الوصف:</label>
+            <input type="text" id="edit-description" />
+          </div>
+          <div class="form-row">
+            <label>التاريخ:</label>
+            <input type="date" id="edit-date" required />
+          </div>
+          <button type="submit" class="btn-primary">حفظ التغييرات</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
