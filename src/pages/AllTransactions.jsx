@@ -127,7 +127,7 @@ function AllTransactions() {
                       fontWeight: "bold",
                     }}
                   >
-                    {tx.amount.toFixed(2)} ريال
+                    {tx.amount.toFixed(2)} درهم
                   </td>
                   <td>{tx.category}</td>
                   <td>{tx.source || "-"}</td>

@@ -9,7 +9,7 @@ function Reports() {
 
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: 5 }, (_, i) => currentYear - i);
+    return Array.from({ length: 10 }, (_, i) => currentYear - i);
   }, []);
 
   const months = [
@@ -109,11 +109,11 @@ function Reports() {
               <div className="summary-cards">
                 <div className="card income">
                   <h3>إجمالي الدخل</h3>
-                  <p>{reportData.totalIncome.toFixed(2)} ريال</p>
+                  <p>{reportData.totalIncome.toFixed(2)} درهم</p>
                 </div>
                 <div className="card expense">
                   <h3>إجمالي المصاريف</h3>
-                  <p>{reportData.totalExpense.toFixed(2)} ريال</p>
+                  <p>{reportData.totalExpense.toFixed(2)} درهم</p>
                 </div>
                 <div className="card balance">
                   <h3>الصافي</h3>
@@ -121,7 +121,7 @@ function Reports() {
                     {(reportData.totalIncome - reportData.totalExpense).toFixed(
                       2
                     )}{" "}
-                    ريال
+                    درهم
                   </p>
                 </div>
               </div>
@@ -149,13 +149,13 @@ function Reports() {
                       <tr key={row.month}>
                         <td>{monthName}</td>
                         <td className="income-text">
-                          {row.totalIncome.toFixed(2)} ريال
+                          {row.totalIncome.toFixed(2)} درهم
                         </td>
                         <td className="expense-text">
-                          {row.totalExpense.toFixed(2)} ريال
+                          {row.totalExpense.toFixed(2)} درهم
                         </td>
                         <td style={{ color: net >= 0 ? "#27ae60" : "#e74c3c" }}>
-                          {net.toFixed(2)} ريال
+                          {net.toFixed(2)} درهم
                         </td>
                       </tr>
                     );
