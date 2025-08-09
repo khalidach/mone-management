@@ -249,7 +249,7 @@ tbody tr:hover {
   font-size: 1.5em;
 }
 
-/* Categories Page Specific Styles */
+/* Categories Page */
 .add-category-form {
   display: grid;
   grid-template-columns: 2fr 1fr auto;
@@ -294,11 +294,19 @@ tbody tr:hover {
   margin-top: 15px;
 }
 
+/* All Transactions Page */
+.full-page-table {
+  grid-column: 1 / -1; /* Make it span full width if it's in a grid */
+}
+.full-page-table h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.8em;
+}
+
 /* Responsive */
 @media (max-width: 992px) {
-  .main-content {
-    grid-template-columns: 1fr;
-  }
+  .main-content,
   .categories-list-container {
     grid-template-columns: 1fr;
   }

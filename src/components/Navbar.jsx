@@ -15,6 +15,9 @@ function Navbar() {
         </li>
         <li>
           <NavLink to="/categories">التصنيفات</NavLink>
+        </li>
+        <li>
+          <NavLink to="/all-transactions">كل المعاملات</NavLink>
         </li>{" "}
         {/* Add the new link */}
       </ul>
