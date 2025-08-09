@@ -1,44 +1,58 @@
 {
-  "name": "money-manager",
+  "name": "money-manager-react",
   "version": "1.0.0",
-  "description": "برنامج تسيير المال الشخصي",
-  "main": "src/main.js",
+  "description": "برنامج تسيير المال الشخصي باستخدام React",
+  "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder",
-    "build-win": "electron-builder --win",
-    "build-mac": "electron-builder --mac",
-    "build-linux": "electron-builder --linux"
-  },
-  "build": {
-    "appId": "com.moneymanager.app",
-    "productName": "مدير المال",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "src/**/*",
-      "node_modules/**/*"
-    ],
-    "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
-    },
-    "mac": {
-      "target": "dmg",
-      "icon": "assets/icon.icns"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png"
-    }
-  },
-  "devDependencies": {
-    "electron": "^27.0.0",
-    "electron-builder": "^24.6.4"
+    "dev": "concurrently \"npm:vite\" \"npm:electron:wait\"",
+    "vite": "vite",
+    "electron:wait": "wait-on tcp:5173 && electron .",
+    "build": "vite build && electron-builder",
+    "postinstall": "electron-rebuild",
+    "build-win": "npm run build && electron-builder --win",
+    "build-mac": "npm run build && electron-builder --mac",
+    "build-linux": "npm run build && electron-builder --linux"
   },
   "dependencies": {
-    "sqlite3": "^5.1.6",
-    "chart.js": "^4.4.0"
+    "chart.js": "^4.4.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.8.0",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "concurrently": "^8.2.2",
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4",
+    "electron-rebuild": "^3.2.9",
+    "vite": "^4.4.5",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.moneymanager.react.app",
+    "productName": "مدير المال React",
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

@@ -1,29 +1,23 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+// Note: In a real Electron app, it's better to use app.getPath('userData')
+// to avoid permission issues, but for simplicity we'll keep it this way.
+const dbPath = path.join(__dirname, "money.db");
 
 class Database {
   constructor() {
-    this.db = new sqlite3.Database(path.join(__dirname, "../data/money.db"));
+    this.db = new sqlite3.Database(dbPath, (err) => {
+      if (err) {
+        console.error("Error opening database", err.message);
+      } else {
+        console.log("Database connected successfully to", dbPath);
+      }
+    });
     this.init();
   }
-  // أضف هذه الدالة بعد getExpenseCategories
-  getCategories(type) {
-    return new Promise((resolve, reject) => {
-      this.db.all(
-        "SELECT category_name FROM custom_categories WHERE type = ? ORDER BY category_name",
-        [type],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows.map((row) => row.category_name));
-        }
-      );
-    });
-  }
 
-  // استبدل دالة init() الكاملة بهذه:
   init() {
     this.db.serialize(() => {
-      // جدول المعاملات فقط - بدون أي بيانات وهمية
       this.db.run(`
             CREATE TABLE IF NOT EXISTS transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +31,6 @@ class Database {
             )
         `);
 
-      // جدول التصنيفات المخصصة
       this.db.run(`
             CREATE TABLE IF NOT EXISTS custom_categories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +39,6 @@ class Database {
             )
         `);
 
-      // إدخال التصنيفات الأساسية فقط إذا لم تكن موجودة
       const defaultCategories = {
         income: ["راتب", "عمل إضافي", "استثمار", "هدايا", "بيع", "أخرى"],
         expense: [
@@ -62,18 +54,19 @@ class Database {
         ],
       };
 
-      // إدخال التصنيفات الأساسية
+      const stmt = this.db.prepare(
+        "INSERT OR IGNORE INTO custom_categories (type, category_name) VALUES (?, ?)"
+      );
       for (const [type, cats] of Object.entries(defaultCategories)) {
         cats.forEach((category) => {
-          this.db.run(
-            "INSERT OR IGNORE INTO custom_categories (type, category_name) VALUES (?, ?)",
-            [type, category]
-          );
+          stmt.run(type, category);
         });
       }
+      stmt.finalize();
     });
   }
 
+  // All other database methods remain the same...
   getTransactions() {
     return new Promise((resolve, reject) => {
       this.db.all(
@@ -109,9 +102,9 @@ class Database {
       this.db.all(
         `
                 SELECT 
-                    SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income,
-                    SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense,
-                    SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END) as balance
+                    COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as total_income,
+                    COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as total_expense,
+                    COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END), 0) as balance
                 FROM transactions 
                 WHERE month = ?
             `,
@@ -130,7 +123,7 @@ class Database {
         `
                 SELECT DISTINCT source, SUM(amount) as total
                 FROM transactions 
-                WHERE type = 'income' AND source != ''
+                WHERE type = 'income' AND source IS NOT NULL AND source != ''
                 GROUP BY source
                 ORDER BY total DESC
             `,
@@ -160,7 +153,6 @@ class Database {
     });
   }
 
-  // أضف هذه الدالة بعد getExpenseCategories
   getCategories(type) {
     return new Promise((resolve, reject) => {
       this.db.all(
@@ -174,9 +166,6 @@ class Database {
     });
   }
 
-  // أضف هذه الدوال بعد getCategories
-
-  // تعديل معاملة
   updateTransaction(id, transaction) {
     return new Promise((resolve, reject) => {
       const { type, amount, category, source, description, date } = transaction;
@@ -195,7 +184,6 @@ class Database {
     });
   }
 
-  // حذف معاملة
   deleteTransaction(id) {
     return new Promise((resolve, reject) => {
       this.db.run(
@@ -209,7 +197,6 @@ class Database {
     });
   }
 
-  // الحصول على معاملة واحدة
   getTransaction(id) {
     return new Promise((resolve, reject) => {
       this.db.get(
@@ -225,10 +212,57 @@ class Database {
 
   exportData() {
     return new Promise((resolve, reject) => {
-      this.db.all("SELECT * FROM transactions", (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
+      this.db.all(
+        "SELECT * FROM transactions ORDER BY date DESC",
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+  }
+
+  // --- NEW METHODS FOR REPORTS ---
+
+  getMonthlyReport(year, month) {
+    const monthStr = `${year}-${month.toString().padStart(2, "0")}`;
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `
+        SELECT 
+          COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as totalIncome,
+          COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as totalExpense
+        FROM transactions 
+        WHERE month = ?
+        `,
+        [monthStr],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows[0] || { totalIncome: 0, totalExpense: 0 });
+        }
+      );
+    });
+  }
+
+  getYearlyReport(year) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `
+        SELECT 
+          month,
+          COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as totalIncome,
+          COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as totalExpense
+        FROM transactions 
+        WHERE strftime('%Y', date) = ?
+        GROUP BY month
+        ORDER BY month ASC
+        `,
+        [year.toString()],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
     });
   }
 }
